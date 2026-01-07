@@ -151,20 +151,20 @@ export default function Produkty() {
   }
 
   return (
-    <section id="produkty" className="py-20 px-4 bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 lg:px-10 xl:px-12">
+    <section id="produkty" className="py-10 sm:py-16 md:py-20 px-3 sm:px-4 bg-white">
+      <div className="max-w-[1400px] mx-auto px-2 sm:px-5 lg:px-10 xl:px-12">
         {/* Nagłówek bestsellery */}
-        <div className="mb-16">
-          <h2 className="text-2xl md:text-3xl font-thin text-gray-800 tracking-wider">
+        <div className="mb-8 sm:mb-12 md:mb-16">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-thin text-gray-800 tracking-wider">
             bestsellery
           </h2>
         </div>
 
         {/* Karuzela bestsellery */}
-        <div className="relative mb-20">
+        <div className="relative mb-10 sm:mb-16 md:mb-20">
           <button
             onClick={() => scroll('left')}
-            className="absolute -left-2 md:-left-6 lg:-left-10 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-14 md:h-14 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-2xl"
+            className="absolute -left-1 sm:-left-2 md:-left-6 lg:-left-10 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-lg sm:text-2xl"
             aria-label="Poprzedni"
           >
             ←
@@ -172,7 +172,7 @@ export default function Produkty() {
 
           <button
             onClick={() => scroll('right')}
-            className="absolute -right-2 md:-right-6 lg:-right-10 top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-14 md:h-14 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-2xl"
+            className="absolute -right-1 sm:-right-2 md:-right-6 lg:-right-10 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-lg sm:text-2xl"
             aria-label="Następny"
           >
             →
@@ -180,14 +180,14 @@ export default function Produkty() {
 
           <div
             ref={scrollRef}
-            className="flex gap-6 md:gap-8 lg:gap-10 overflow-x-auto pb-6 snap-x snap-mandatory scroll-smooth scrollbar-hide"
+            className="flex gap-4 sm:gap-6 md:gap-8 lg:gap-10 overflow-x-auto pb-4 sm:pb-6 snap-x snap-mandatory scroll-smooth scrollbar-hide"
           >
             {bestsellers.map((product, i) => {
               const fullProduct = products.find(p => p.id === product.id);
               return (
                 <div
                   key={i}
-                  className="flex-none w-[300px] sm:w-[340px] md:w-[380px] lg:w-[420px] snap-start"
+                  className="flex-none w-[280px] sm:w-[320px] md:w-[380px] lg:w-[420px] snap-start"
                 >
                   <div
                     className="group relative bg-white transition-all duration-500 hover:shadow-2xl cursor-pointer"
@@ -201,9 +201,9 @@ export default function Produkty() {
                         loading={i < 2 ? 'eager' : 'lazy'}
                       />
                       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-5 right-5 z-10 flex flex-col gap-2">
+                      <div className="absolute top-3 sm:top-4 md:top-5 right-3 sm:right-4 md:right-5 z-10 flex flex-col gap-1.5 sm:gap-2">
                         <button
-                          className="text-white text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                          className="text-white text-2xl sm:text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
                           aria-label="Dodaj do ulubionych"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -226,7 +226,7 @@ export default function Produkty() {
                           {fullProduct && isInWishlist(fullProduct.id) ? '♥' : '♡'}
                         </button>
                         <button
-                          className="text-white text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                          className="text-white text-xl sm:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
                           aria-label="Dodaj do koszyka"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -246,14 +246,14 @@ export default function Produkty() {
                         </button>
                       </div>
                     </div>
-                    <div className="py-8 px-6 text-center">
-                      <h3 className="text-xl md:text-2xl font-light text-gray-900 mb-2.5 tracking-wide">
+                    <div className="py-4 sm:py-6 md:py-8 px-3 sm:px-4 md:px-6 text-center">
+                      <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-light text-gray-900 mb-2 sm:mb-2.5 tracking-wide">
                         {product.name}
                       </h3>
-                      <p className="text-sm md:text-base text-gray-600 mb-5 font-light line-clamp-2">
+                      <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-3 sm:mb-4 md:mb-5 font-light line-clamp-2">
                         {product.desc}
                       </p>
-                      <p className="text-2xl md:text-3xl font-medium text-gray-900">
+                      <p className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-900">
                         {product.price}
                       </p>
                     </div>
@@ -265,20 +265,16 @@ export default function Produkty() {
         </div>
 
         {/* Tekst opisowy i kategorie */}
-        <div className="mb-20">
-          <div className="max-w-3xl mx-auto mb-16 px-8 py-10 bg-gradient-to-br from-gray-50 to-white border border-gray-200 relative">
-           
-
-           
-
-            <p className="text-center text-base md:text-lg text-gray-700 leading-relaxed italic font-light tracking-wide">
+        <div className="mb-10 sm:mb-16 md:mb-20">
+          <div className="max-w-3xl mx-auto mb-8 sm:mb-12 md:mb-16 px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 bg-gradient-to-br from-gray-50 to-white border border-gray-200 relative">
+            <p className="text-center text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed italic font-light tracking-wide">
               Kiedy chcesz czegoś naprawdę wyjątkowego…<br />
               <span className="text-gray-600">
                 Coś, co porusza się przy każdym Twoim kroku, mieni się w świetle i przypomina, że prawdziwe piękno pochodzi z natury.
               </span>
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {categories.map((category, index) => (
               <div
                 key={index}
@@ -296,7 +292,7 @@ export default function Produkty() {
                       ? 'bg-black/50'
                       : 'bg-black/30 group-hover:bg-black/40'
                   }`}>
-                    <h3 className="text-white text-xl font-medium uppercase tracking-wide">
+                    <h3 className="text-white text-xs sm:text-sm md:text-base font-medium uppercase tracking-wide px-1 sm:px-2">
                       {category.name}
                     </h3>
                   </div>
@@ -307,14 +303,14 @@ export default function Produkty() {
         </div>
 
         {/* Pozostałe produkty - siatka */}
-        <div className="mb-16 flex items-center justify-between">
-          <h3 className="text-2xl md:text-3xl font-thin text-gray-800 tracking-wider">
+        <div className="mb-8 sm:mb-12 md:mb-16 flex items-center justify-between">
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-thin text-gray-800 tracking-wider">
             {selectedCategory ? selectedCategory : 'Pozostałe produkty'}
           </h3>
           {selectedCategory && (
             <button
               onClick={() => setSelectedCategory(null)}
-              className="text-sm text-gray-600 hover:text-gray-900 underline"
+              className="text-xs sm:text-sm text-gray-600 hover:text-gray-900 underline"
             >
               Pokaż wszystkie
             </button>
@@ -322,12 +318,12 @@ export default function Produkty() {
         </div>
 
         {filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
+          <div className="flex flex-col items-center justify-center py-10 sm:py-16 md:py-20 px-3 sm:px-4">
             <div className="max-w-2xl text-center">
-              <p className="text-lg md:text-xl text-gray-700 leading-relaxed mb-6">
+              <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed mb-4 sm:mb-6">
                 Niestety w tym momencie nie ma akcesorii z tej kategorii, ale mogę zrobić na zamówienie specjalnie dla Ciebie!
               </p>
-              <p className="text-base text-gray-600 mb-8">
+              <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8">
                 A moje prace archiwalne można zobaczyć{' '}
                 <a
                   href="https://www.zglowawpiorach.pl/galeria"
@@ -340,14 +336,14 @@ export default function Produkty() {
               </p>
               <button
                 onClick={() => setSelectedCategory(null)}
-                className="bg-gray-900 text-white py-3 px-8 text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors"
+                className="bg-gray-900 text-white py-2.5 sm:py-3 px-6 sm:px-8 text-xs sm:text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors"
               >
                 Zobacz wszystkie produkty
               </button>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {filteredProducts.map((product, index) => {
               const fullProduct = products.find(p => p.id === product.id);
               return (
@@ -363,9 +359,9 @@ export default function Produkty() {
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
                     />
                     <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+                    <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 flex flex-col gap-1">
                       <button
-                        className="text-white text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                        className="text-white text-xl sm:text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
                         aria-label="Dodaj do ulubionych"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -388,7 +384,7 @@ export default function Produkty() {
                         {fullProduct && isInWishlist(fullProduct.id) ? '♥' : '♡'}
                       </button>
                       <button
-                        className="text-white text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                        className="text-white text-lg sm:text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
                         aria-label="Dodaj do koszyka"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -408,14 +404,14 @@ export default function Produkty() {
                       </button>
                     </div>
                   </div>
-                  <div className="py-4 px-3 text-center">
-                    <h3 className="text-base md:text-lg font-light text-gray-900 mb-1.5 tracking-wide">
+                  <div className="py-3 sm:py-4 px-2 sm:px-3 text-center">
+                    <h3 className="text-sm sm:text-base md:text-lg font-light text-gray-900 mb-1 sm:mb-1.5 tracking-wide line-clamp-2">
                       {product.name}
                     </h3>
-                    <p className="text-xs md:text-sm text-gray-600 mb-3 font-light line-clamp-2">
+                    <p className="text-xs md:text-sm text-gray-600 mb-2 sm:mb-3 font-light line-clamp-2">
                       {product.desc}
                     </p>
-                    <p className="text-lg md:text-xl font-medium text-gray-900">
+                    <p className="text-base sm:text-lg md:text-xl font-medium text-gray-900">
                       {product.price}
                     </p>
                   </div>

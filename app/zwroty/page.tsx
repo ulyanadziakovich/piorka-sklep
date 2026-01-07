@@ -5,7 +5,7 @@ export default function Zwroty() {
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
-      <div className="h-[88px]"></div>
+      <div className="h-[72px] sm:h-[80px] md:h-[88px]"></div>
 
       <main className="max-w-4xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
         {/* Nagłówek */}

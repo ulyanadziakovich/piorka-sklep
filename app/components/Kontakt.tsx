@@ -1,8 +1,8 @@
 export default function Kontakt() {
   return (
-    <footer id="kontakt" className="py-12 px-4 bg-[#f9f7f4] border-t border-gray-200">
+    <footer id="kontakt" className="py-8 sm:py-10 md:py-12 px-3 sm:px-4 bg-[#f9f7f4] border-t border-gray-200">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center md:text-left">
           {/* Informacje kontaktowe */}
           <div>
             <h3 className="text-sm font-medium text-gray-800 mb-4 uppercase tracking-wide">Informacje kontaktowe</h3>
@@ -64,7 +64,7 @@ export default function Kontakt() {
           </div>
         </div>
         {/* Linki prawne */}
-        <div className="mt-10 flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+        <div className="mt-8 sm:mt-10 flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600">
           <a href="/regulamin-sklepu" className="hover:text-gray-900 underline transition-colors" target="_blank" rel="noopener noreferrer">Regulamin sklepu</a>
           <a href="/polityka-prywatnosci" className="hover:text-gray-900 underline transition-colors" target="_blank" rel="noopener noreferrer">Polityka prywatności</a>
           <a href="/reklamacja" className="hover:text-gray-900 underline transition-colors" target="_blank" rel="noopener noreferrer">Reklamacja</a>
