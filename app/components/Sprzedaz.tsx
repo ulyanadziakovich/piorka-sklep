@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useShop } from '../context/ShopContext';
 
 interface Product {
   id: number;
@@ -22,6 +23,7 @@ export default function Produkty() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const { addToWishlist, removeFromWishlist, isInWishlist, addToCart } = useShop();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -199,13 +201,50 @@ export default function Produkty() {
                         loading={i < 2 ? 'eager' : 'lazy'}
                       />
                       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <button
-                        className="absolute top-5 right-5 z-10 text-white text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
-                        aria-label="Dodaj do ulubionych"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        ♡
-                      </button>
+                      <div className="absolute top-5 right-5 z-10 flex flex-col gap-2">
+                        <button
+                          className="text-white text-3xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                          aria-label="Dodaj do ulubionych"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (fullProduct) {
+                              const shopProduct = {
+                                id: fullProduct.id,
+                                name: fullProduct.tytul || fullProduct.name,
+                                price: fullProduct.price.toFixed(2),
+                                image: fullProduct.images[0]?.url || '/2.jpg',
+                                description: fullProduct.opis || fullProduct.description,
+                              };
+                              if (isInWishlist(fullProduct.id)) {
+                                removeFromWishlist(fullProduct.id);
+                              } else {
+                                addToWishlist(shopProduct);
+                              }
+                            }
+                          }}
+                        >
+                          {fullProduct && isInWishlist(fullProduct.id) ? '♥' : '♡'}
+                        </button>
+                        <button
+                          className="text-white text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                          aria-label="Dodaj do koszyka"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (fullProduct) {
+                              const shopProduct = {
+                                id: fullProduct.id,
+                                name: fullProduct.tytul || fullProduct.name,
+                                price: fullProduct.price.toFixed(2),
+                                image: fullProduct.images[0]?.url || '/2.jpg',
+                                description: fullProduct.opis || fullProduct.description,
+                              };
+                              addToCart(shopProduct);
+                            }
+                          }}
+                        >
+                          🛒
+                        </button>
+                      </div>
                     </div>
                     <div className="py-8 px-6 text-center">
                       <h3 className="text-xl md:text-2xl font-light text-gray-900 mb-2.5 tracking-wide">
@@ -324,13 +363,50 @@ export default function Produkty() {
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
                     />
                     <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <button
-                      className="absolute top-3 right-3 z-10 text-white text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
-                      aria-label="Dodaj do ulubionych"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      ♡
-                    </button>
+                    <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+                      <button
+                        className="text-white text-2xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                        aria-label="Dodaj do ulubionych"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (fullProduct) {
+                            const shopProduct = {
+                              id: fullProduct.id,
+                              name: fullProduct.tytul || fullProduct.name,
+                              price: fullProduct.price.toFixed(2),
+                              image: fullProduct.images[0]?.url || '/2.jpg',
+                              description: fullProduct.opis || fullProduct.description,
+                            };
+                            if (isInWishlist(fullProduct.id)) {
+                              removeFromWishlist(fullProduct.id);
+                            } else {
+                              addToWishlist(shopProduct);
+                            }
+                          }
+                        }}
+                      >
+                        {fullProduct && isInWishlist(fullProduct.id) ? '♥' : '♡'}
+                      </button>
+                      <button
+                        className="text-white text-xl drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)] hover:scale-110 transition-transform"
+                        aria-label="Dodaj do koszyka"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (fullProduct) {
+                            const shopProduct = {
+                              id: fullProduct.id,
+                              name: fullProduct.tytul || fullProduct.name,
+                              price: fullProduct.price.toFixed(2),
+                              image: fullProduct.images[0]?.url || '/2.jpg',
+                              description: fullProduct.opis || fullProduct.description,
+                            };
+                            addToCart(shopProduct);
+                          }
+                        }}
+                      >
+                        🛒
+                      </button>
+                    </div>
                   </div>
                   <div className="py-4 px-3 text-center">
                     <h3 className="text-base md:text-lg font-light text-gray-900 mb-1.5 tracking-wide">
@@ -353,19 +429,19 @@ export default function Produkty() {
       {/* Modal produktu */}
       {selectedProduct && (
         <div
-          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-2 sm:p-4"
           onClick={() => {
             setSelectedProduct(null);
             setSelectedImageIndex(0);
           }}
         >
           <div
-            className="bg-white max-w-6xl w-full max-h-[90vh] overflow-y-auto relative"
+            className="bg-white max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Przycisk zamknięcia */}
             <button
-              className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-lg text-gray-800 hover:text-gray-900 text-2xl transition-colors"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-lg text-gray-800 hover:text-gray-900 text-xl sm:text-2xl transition-colors"
               onClick={() => {
                 setSelectedProduct(null);
                 setSelectedImageIndex(0);
@@ -375,7 +451,7 @@ export default function Produkty() {
               ×
             </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 p-4 sm:p-6 md:p-10">
               {/* Galeria zdjęć */}
               <div className="space-y-4">
                 {/* Główne zdjęcie */}
@@ -424,15 +500,15 @@ export default function Produkty() {
 
               {/* Informacje o produkcie */}
               <div className="flex flex-col">
-                <h2 className="text-3xl md:text-4xl font-light text-gray-900 mb-4 tracking-wide">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-gray-900 mb-3 sm:mb-4 tracking-wide">
                   {selectedProduct.tytul || selectedProduct.name}
                 </h2>
 
-                <p className="text-3xl md:text-4xl font-medium text-gray-900 mb-6">
+                <p className="text-2xl sm:text-3xl md:text-4xl font-medium text-gray-900 mb-4 sm:mb-6">
                   {selectedProduct.price.toFixed(2)} zł
                 </p>
 
-                <div className="mb-6 pb-6 border-b border-gray-200">
+                <div className="mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-200">
                   <h3 className="text-sm uppercase tracking-wide text-gray-600 mb-2 font-medium">
                     Opis
                   </h3>
@@ -452,12 +528,40 @@ export default function Produkty() {
                   </div>
                 )}
 
-                <div className="mt-auto pt-6">
-                  <button className="w-full bg-gray-900 text-white py-4 px-8 text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors">
+                <div className="mt-auto pt-4 sm:pt-6">
+                  <button
+                    className="w-full bg-gray-900 text-white py-3 sm:py-4 px-6 sm:px-8 text-xs sm:text-sm uppercase tracking-wide hover:bg-gray-800 transition-colors"
+                    onClick={() => {
+                      const shopProduct = {
+                        id: selectedProduct.id,
+                        name: selectedProduct.tytul || selectedProduct.name,
+                        price: selectedProduct.price.toFixed(2),
+                        image: selectedProduct.images[0]?.url || '/2.jpg',
+                        description: selectedProduct.opis || selectedProduct.description,
+                      };
+                      addToCart(shopProduct);
+                    }}
+                  >
                     Dodaj do koszyka
                   </button>
-                  <button className="w-full mt-3 border border-gray-300 text-gray-800 py-4 px-8 text-sm uppercase tracking-wide hover:bg-gray-50 transition-colors">
-                    ♡ Dodaj do ulubionych
+                  <button
+                    className="w-full mt-2 sm:mt-3 border border-gray-300 text-gray-800 py-3 sm:py-4 px-6 sm:px-8 text-xs sm:text-sm uppercase tracking-wide hover:bg-gray-50 transition-colors"
+                    onClick={() => {
+                      const shopProduct = {
+                        id: selectedProduct.id,
+                        name: selectedProduct.tytul || selectedProduct.name,
+                        price: selectedProduct.price.toFixed(2),
+                        image: selectedProduct.images[0]?.url || '/2.jpg',
+                        description: selectedProduct.opis || selectedProduct.description,
+                      };
+                      if (isInWishlist(selectedProduct.id)) {
+                        removeFromWishlist(selectedProduct.id);
+                      } else {
+                        addToWishlist(shopProduct);
+                      }
+                    }}
+                  >
+                    {isInWishlist(selectedProduct.id) ? '♥' : '♡'} {isInWishlist(selectedProduct.id) ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}
                   </button>
                 </div>
               </div>
