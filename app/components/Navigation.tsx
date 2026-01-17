@@ -2,16 +2,92 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useShop } from '../context/ShopContext';
+
+interface Product {
+  id: number;
+  nazwa: string;
+  tytul: string;
+  opis: string;
+  images: { url: string }[];
+}
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProduktyOpen, setIsProduktyOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const { wishlist, cart, getCartTotal, getCartCount, removeFromWishlist, removeFromCart, updateCartQuantity } = useShop();
+
+  // Fetch products when search opens
+  useEffect(() => {
+    if (isSearchOpen && allProducts.length === 0) {
+      setIsLoadingProducts(true);
+      fetch('/api/products')
+        .then(res => res.json())
+        .then(data => {
+          setAllProducts(data.products || []);
+          setIsLoadingProducts(false);
+        })
+        .catch(() => setIsLoadingProducts(false));
+    }
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen, allProducts.length]);
+
+  // Close search on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    if (isSearchOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSearchOpen]);
+
+  // Static voucher item for search
+  const voucherItem = {
+    id: 'voucher',
+    tytul: 'Voucher podarunkowy',
+    nazwa: 'Voucher podarunkowy',
+    opis: 'Idealny prezent dla bliskiej osoby. Voucher na biżuterię z piór.',
+    images: [{ url: '/bon.jpg' }],
+    isVoucher: true,
+  };
+
+  // Filter products based on search query
+  const query = searchQuery.toLowerCase();
+  const matchesVoucher = query.length > 0 && (
+    'voucher'.includes(query) ||
+    'bon'.includes(query) ||
+    'prezent'.includes(query) ||
+    'podarunkowy'.includes(query) ||
+    voucherItem.tytul.toLowerCase().includes(query)
+  );
+
+  const productResults = searchQuery.length > 0
+    ? allProducts.filter(product =>
+        product.tytul?.toLowerCase().includes(query) ||
+        product.nazwa?.toLowerCase().includes(query) ||
+        (product.opis && product.opis.toLowerCase().includes(query))
+      ).slice(0, matchesVoucher ? 7 : 8)
+    : [];
+
+  const searchResults = matchesVoucher
+    ? [voucherItem, ...productResults]
+    : productResults;
 
   const handleMouseEnter = () => {
     if (closeTimeoutRef.current) {
@@ -106,11 +182,102 @@ export default function Navigation() {
 
             <div className="hidden lg:flex flex-1 items-center justify-end">
               <div className="flex items-center space-x-4">
-                <button className="text-gray-700 hover:text-gray-900 transition-colors" aria-label="Szukaj">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </button>
+                {/* Search Input with Dropdown */}
+                <div ref={searchContainerRef} className="relative">
+                  <div className="flex items-center bg-gray-100 rounded-full px-3 py-1.5">
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Szukaj..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => setIsSearchOpen(true)}
+                      className="bg-transparent border-none outline-none text-sm ml-2 w-32 text-gray-900 placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* Search Dropdown */}
+                  {isSearchOpen && searchQuery.length > 0 && (
+                    <div className="absolute top-full left-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                      {isLoadingProducts ? (
+                        <div className="p-4 text-center text-gray-500">Ładowanie...</div>
+                      ) : searchResults.length > 0 ? (
+                        <div className="py-2">
+                          {searchResults.map((product) => {
+                            const isVoucher = 'isVoucher' in product;
+                            return isVoucher ? (
+                              <Link
+                                key={product.id}
+                                href="/vouchery"
+                                onClick={() => {
+                                  setIsSearchOpen(false);
+                                  setSearchQuery('');
+                                }}
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                              >
+                                <img
+                                  src={product.images?.[0]?.url}
+                                  alt={product.tytul || product.nazwa}
+                                  className="w-14 h-14 object-cover rounded"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-medium text-gray-900 truncate">
+                                    {product.tytul || product.nazwa}
+                                  </h4>
+                                  <p className="text-xs text-gray-500 line-clamp-1">
+                                    {product.opis?.replace(/<[^>]*>/g, '').slice(0, 50)}...
+                                  </p>
+                                </div>
+                              </Link>
+                            ) : (
+                              <button
+                                type="button"
+                                key={product.id}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const productId = product.id;
+                                  // Store in localStorage as fallback
+                                  localStorage.setItem('openProductId', String(productId));
+                                  setIsSearchOpen(false);
+                                  setSearchQuery('');
+                                  setTimeout(() => {
+                                    const win = window as Window & { openProductModal?: (id: number) => void };
+                                    if (win.openProductModal) {
+                                      win.openProductModal(productId);
+                                    }
+                                  }, 150);
+                                }}
+                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors w-full text-left"
+                              >
+                                <img
+                                  src={product.images?.[0]?.url}
+                                  alt={product.tytul || product.nazwa}
+                                  className="w-14 h-14 object-cover rounded"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm font-medium text-gray-900 truncate">
+                                    {product.tytul || product.nazwa}
+                                  </h4>
+                                  <p className="text-xs text-gray-500 line-clamp-1">
+                                    {product.opis?.replace(/<[^>]*>/g, '').slice(0, 50)}...
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="p-4 text-center text-gray-500">
+                          Brak wyników dla &quot;{searchQuery}&quot;
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <button
                   className="text-gray-700 hover:text-gray-900 transition-colors relative"
                   aria-label="Ulubione"
@@ -155,6 +322,7 @@ export default function Navigation() {
               <button
                 className="text-gray-700 hover:text-gray-900 transition-colors"
                 aria-label="Szukaj"
+                onClick={() => setIsSearchOpen(true)}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -386,6 +554,122 @@ export default function Navigation() {
                     </button>
                   </div>
                 </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Search Modal */}
+      {isSearchOpen && (
+        <div className="lg:hidden fixed inset-0 z-[200] bg-white">
+          <div className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 flex items-center bg-gray-100 rounded-full px-4 py-2">
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Szukaj produktów..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-transparent border-none outline-none text-base ml-2 w-full text-gray-900 placeholder-gray-500"
+                  autoFocus
+                />
+              </div>
+              <button
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  setSearchQuery('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Mobile Search Results */}
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 100px)' }}>
+              {isLoadingProducts ? (
+                <div className="p-4 text-center text-gray-500">Ładowanie...</div>
+              ) : searchQuery.length > 0 && searchResults.length > 0 ? (
+                <div className="space-y-1">
+                  {searchResults.map((product) => {
+                    const isVoucher = 'isVoucher' in product;
+                    return isVoucher ? (
+                      <Link
+                        key={product.id}
+                        href="/vouchery"
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          setSearchQuery('');
+                        }}
+                        className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <img
+                          src={product.images?.[0]?.url}
+                          alt={product.tytul || product.nazwa}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">
+                            {product.tytul || product.nazwa}
+                          </h4>
+                          <p className="text-xs text-gray-500 line-clamp-2">
+                            {product.opis?.replace(/<[^>]*>/g, '').slice(0, 60)}...
+                          </p>
+                        </div>
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        key={product.id}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const productId = product.id;
+                          // Store in localStorage as fallback
+                          localStorage.setItem('openProductId', String(productId));
+                          setIsSearchOpen(false);
+                          setSearchQuery('');
+                          setTimeout(() => {
+                            const win = window as Window & { openProductModal?: (id: number) => void };
+                            if (win.openProductModal) {
+                              win.openProductModal(productId);
+                            }
+                          }, 150);
+                        }}
+                        className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors w-full text-left"
+                      >
+                        <img
+                          src={product.images?.[0]?.url}
+                          alt={product.tytul || product.nazwa}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">
+                            {product.tytul || product.nazwa}
+                          </h4>
+                          <p className="text-xs text-gray-500 line-clamp-2">
+                            {product.opis?.replace(/<[^>]*>/g, '').slice(0, 60)}...
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : searchQuery.length > 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  Brak wyników dla &quot;{searchQuery}&quot;
+                </div>
+              ) : (
+                <div className="p-4 text-center text-gray-400">
+                  Wpisz nazwę produktu...
+                </div>
               )}
             </div>
           </div>

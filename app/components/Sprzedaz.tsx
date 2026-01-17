@@ -57,6 +57,52 @@ export default function Produkty() {
     fetchProducts();
   }, []);
 
+  // Open product modal - exposed globally for search
+  const openProductById = (productId: string | number) => {
+    const id = typeof productId === 'string' ? parseInt(productId) : productId;
+    const product = products.find(p => p.id === id);
+    if (product) {
+      setSelectedProduct(product);
+      setSelectedImageIndex(0);
+    }
+  };
+
+  // Expose function globally for search to call
+  useEffect(() => {
+    (window as Window & { openProductModal?: (id: string | number) => void }).openProductModal = openProductById;
+    return () => {
+      delete (window as Window & { openProductModal?: (id: string | number) => void }).openProductModal;
+    };
+  }, [products]);
+
+  // Check URL param and localStorage on mount and periodically
+  useEffect(() => {
+    const checkForProductToOpen = () => {
+      // Check URL param
+      const params = new URLSearchParams(window.location.search);
+      const urlProductId = params.get('product');
+      if (urlProductId && products.length > 0) {
+        openProductById(urlProductId);
+        window.history.replaceState({}, '', '/');
+        return;
+      }
+
+      // Check localStorage fallback
+      const storedProductId = localStorage.getItem('openProductId');
+      if (storedProductId && products.length > 0) {
+        localStorage.removeItem('openProductId');
+        openProductById(storedProductId);
+      }
+    };
+
+    checkForProductToOpen();
+
+    // Check periodically for localStorage changes (mobile fallback)
+    const interval = setInterval(checkForProductToOpen, 200);
+
+    return () => clearInterval(interval);
+  }, [products]);
+
   const scroll = (direction: 'left' | 'right') => {
     if (!scrollRef.current) return;
     const scrollAmount = scrollRef.current.clientWidth * 0.85;
@@ -164,7 +210,7 @@ export default function Produkty() {
         <div className="relative mb-10 sm:mb-16 md:mb-20">
           <button
             onClick={() => scroll('left')}
-            className="absolute -left-1 sm:-left-2 md:-left-6 lg:-left-10 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-lg sm:text-2xl"
+            className="absolute -left-1 sm:-left-2 md:-left-6 lg:-left-10 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 hidden sm:flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-lg sm:text-2xl"
             aria-label="Poprzedni"
           >
             ←
@@ -172,7 +218,7 @@ export default function Produkty() {
 
           <button
             onClick={() => scroll('right')}
-            className="absolute -right-1 sm:-right-2 md:-right-6 lg:-right-10 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-lg sm:text-2xl"
+            className="absolute -right-1 sm:-right-2 md:-right-6 lg:-right-10 top-1/2 -translate-y-1/2 z-10 w-8 h-8 sm:w-11 sm:h-11 md:w-14 md:h-14 hidden sm:flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all text-gray-700 hover:text-gray-900 text-lg sm:text-2xl"
             aria-label="Następny"
           >
             →
@@ -194,7 +240,7 @@ export default function Produkty() {
                     onClick={() => fullProduct && setSelectedProduct(fullProduct)}
                   >
                     <div className="relative aspect-square overflow-hidden">
-                      <img
+                      <img 
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
@@ -250,9 +296,10 @@ export default function Produkty() {
                       <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-light text-gray-900 mb-2 sm:mb-2.5 tracking-wide">
                         {product.name}
                       </h3>
-                      <p className="text-xs sm:text-sm md:text-base text-gray-600 mb-3 sm:mb-4 md:mb-5 font-light line-clamp-2">
-                        {product.desc}
-                      </p>
+                      <p
+                        className="text-xs sm:text-sm md:text-base text-gray-600 mb-3 sm:mb-4 md:mb-5 font-light line-clamp-2"
+                        dangerouslySetInnerHTML={{ __html: product.desc }}
+                      />
                       <p className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-900">
                         {product.price}
                       </p>
@@ -408,9 +455,10 @@ export default function Produkty() {
                     <h3 className="text-sm sm:text-base md:text-lg font-light text-gray-900 mb-1 sm:mb-1.5 tracking-wide line-clamp-2">
                       {product.name}
                     </h3>
-                    <p className="text-xs md:text-sm text-gray-600 mb-2 sm:mb-3 font-light line-clamp-2">
-                      {product.desc}
-                    </p>
+                    <p
+                      className="text-xs md:text-sm text-gray-600 mb-2 sm:mb-3 font-light line-clamp-2"
+                      dangerouslySetInnerHTML={{ __html: product.desc }}
+                    />
                     <p className="text-base sm:text-lg md:text-xl font-medium text-gray-900">
                       {product.price}
                     </p>
@@ -508,9 +556,10 @@ export default function Produkty() {
                   <h3 className="text-sm uppercase tracking-wide text-gray-600 mb-2 font-medium">
                     Opis
                   </h3>
-                  <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {selectedProduct.opis || selectedProduct.description}
-                  </p>
+                  <div
+                    className="text-base text-gray-700 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: selectedProduct.opis || selectedProduct.description || '' }}
+                  />
                 </div>
 
                 {selectedProduct.przeznaczenie_ogolne && (
